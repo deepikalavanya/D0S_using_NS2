@@ -2,11 +2,11 @@
 set ns [new Simulator]
 
 #create trace file
-set tracefile [open stabletcp.tr w]
+set tracefile [open stableudp.tr w]
 $ns trace-all $tracefile
 
 #nam file creation
-set namfile [open stabletcp.nam w]
+set namfile [open stableudp.nam w]
 $ns namtrace-all $namfile
 
 #finish procedure
@@ -27,26 +27,18 @@ set n2 [$ns node]
 $ns duplex-link $n1 $n2 5Mb 2ms DropTail
 
 #agent creation
-set tcp [new Agent/TCP]
-$tcp set class_ 2
-$ns attach-agent $n1 $tcp
-
-set sink [new Agent/TCPSink]
-$ns attach-agent $n2 $sink
-
-$ns connect $tcp $sink
+set udp [new Agent/UDP]
+$ns attach-agent $n1 $udp
+set null [new Agent/Null]
+$ns attach-agent $n2 $null
+$ns connect $udp $null
 
 #generate the traffic
-set ftpstable [new Application/FTP]
-$ftpstable attach-agent $tcp
-$ftpstable set type_ FTP
-$ftpstable set packet_size_ 1000
-$ftpstable set rate_ 1mb
+set cbrstable [new Application/Traffic/CBR]
+$cbrstable attach-agent $udp
 
 #start traffic
-$ns at 0.1 "$ftpstable start"
-$ns at 4.5 "$ftpstable stop"
-
+$ns at 0.1 "$cbrstable start"
+$ns at 4.5 "$cbrstable stop"
 $ns at 5.0 "finish"
-
 $ns run
